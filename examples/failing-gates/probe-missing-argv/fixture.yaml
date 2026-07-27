@@ -1,0 +1,6 @@
+slug: failing-probe-argv
+title: Fixture de probe inválido
+question: ¿El probe declara cómo ejecutarse?
+mode: full
+stage: probe
+expected_check: benchmark_reproducible

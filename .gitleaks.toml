@@ -1,0 +1,13 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Ignore generated local tooling state; release archives remain in scope."
+paths = [
+    '''(^|/)\.git/''',
+    '''(^|/)\.venv/''',
+    '''(^|/)\.pytest_cache/''',
+    '''(^|/)\.ruff_cache/''',
+    '''(^|/)__pycache__/''',
+    '''(^|/)build/''',
+]

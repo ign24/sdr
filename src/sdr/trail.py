@@ -1,0 +1,157 @@
+"""Rastro git de la investigación: un commit estructurado por transición.
+
+SDR es a la investigación lo que SDD al vibecoding: el historial de git ES la
+trazabilidad. Cada transición de estado (new, avance de etapa, reopen, drop,
+archive) se registra como `research(<slug>): <transición>` sobre los archivos
+de la investigación. Sin repo git el rastro se degrada con advertencia, nunca
+bloquea el trabajo.
+"""
+
+from __future__ import annotations
+
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+
+from sdr.research import Research
+
+
+@dataclass
+class TrailResult:
+    committed: bool
+    message: str = ""
+    warning: str = ""
+
+
+def _git(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, check=False)
+
+
+def _repo_root(path: Path) -> Path | None:
+    result = _git(["rev-parse", "--show-toplevel"], cwd=path)
+    if result.returncode != 0:
+        return None
+    return Path(result.stdout.strip())
+
+
+def _warning(result: subprocess.CompletedProcess[str], fallback: str) -> str:
+    return result.stderr.strip() or result.stdout.strip() or fallback
+
+
+def _relative_paths(paths: list[Path], within: Path, label: str) -> tuple[list[str], str]:
+    relative: list[str] = []
+    for path in paths:
+        try:
+            relative.append(str(path.resolve().relative_to(within)))
+        except ValueError:
+            return [], f"{label} fuera del repositorio: {path}"
+    return relative, ""
+
+
+def _index_path(root: Path) -> Path | None:
+    result = _git(["rev-parse", "--git-path", "index"], cwd=root)
+    if result.returncode != 0:
+        return None
+    path = Path(result.stdout.strip())
+    return path if path.is_absolute() else root / path
+
+
+def _restore_index(path: Path, contents: bytes | None) -> str:
+    try:
+        if contents is None:
+            path.unlink(missing_ok=True)
+        else:
+            path.write_bytes(contents)
+    except OSError as exc:
+        return f"no se pudo restaurar el staging previo: {exc}"
+    return ""
+
+
+def commit_transition(
+    research: Research,
+    transition: str,
+    paths: list[Path] | None = None,
+    extra_paths: list[Path] | None = None,
+) -> TrailResult:
+    """Commitea los archivos de la investigación con mensaje estructurado.
+
+    `transition` describe el cambio de estado: "new", "intake -> explore",
+    "reopen probe -> explore", "drop", "archive".
+    """
+    message = f"research({research.meta.slug}): {transition}"
+    root = _repo_root(research.root)
+    if root is None:
+        return TrailResult(
+            committed=False,
+            message=message,
+            warning="sin repositorio git: la transición no quedó registrada en el rastro",
+        )
+
+    research_root = research.root.resolve()
+    try:
+        research_root.relative_to(root)
+    except ValueError:
+        return TrailResult(
+            committed=False,
+            message=message,
+            warning=f"la investigación está fuera del repositorio detectado: {research.root}",
+        )
+
+    selected = paths if paths is not None else [research.root]
+    research_paths, warning = _relative_paths(selected, research_root, "path de investigación")
+    if warning:
+        return TrailResult(committed=False, message=message, warning=warning)
+    research_prefix = str(research_root.relative_to(root))
+    rel_paths = [str(Path(research_prefix) / path) for path in research_paths]
+    extras, warning = _relative_paths(extra_paths or [], root, "path extra")
+    if warning:
+        return TrailResult(committed=False, message=message, warning=warning)
+    rel_paths = list(dict.fromkeys([*rel_paths, *extras]))
+    if not rel_paths:
+        return TrailResult(committed=False, message=message, warning="sin paths que registrar")
+
+    index_path = _index_path(root)
+    if index_path is None:
+        return TrailResult(
+            committed=False,
+            message=message,
+            warning="no se pudo localizar el índice git",
+        )
+    try:
+        previous_index = index_path.read_bytes() if index_path.exists() else None
+    except OSError as exc:
+        return TrailResult(
+            committed=False,
+            message=message,
+            warning=f"no se pudo preservar el staging previo: {exc}",
+        )
+
+    add = _git(["add", "--", *rel_paths], cwd=root)
+    if add.returncode != 0:
+        restore_warning = _restore_index(index_path, previous_index)
+        warning = _warning(add, "git add falló")
+        if restore_warning:
+            warning = f"{warning}; {restore_warning}"
+        return TrailResult(committed=False, message=message, warning=warning)
+
+    staged = _git(["diff", "--cached", "--quiet", "--", *rel_paths], cwd=root)
+    if staged.returncode == 0:
+        restore_warning = _restore_index(index_path, previous_index)
+        if restore_warning:
+            return TrailResult(committed=False, message=message, warning=restore_warning)
+        return TrailResult(committed=False, message=message, warning="sin cambios que registrar")
+    if staged.returncode != 1:
+        restore_warning = _restore_index(index_path, previous_index)
+        warning = _warning(staged, "no se pudo inspeccionar el staging")
+        if restore_warning:
+            warning = f"{warning}; {restore_warning}"
+        return TrailResult(committed=False, message=message, warning=warning)
+
+    commit = _git(["commit", "-m", message, "--", *rel_paths], cwd=root)
+    if commit.returncode != 0:
+        restore_warning = _restore_index(index_path, previous_index)
+        warning = _warning(commit, "git commit falló")
+        if restore_warning:
+            warning = f"{warning}; {restore_warning}"
+        return TrailResult(committed=False, message=message, warning=warning)
+    return TrailResult(committed=True, message=message)

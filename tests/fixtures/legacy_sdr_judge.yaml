@@ -1,0 +1,25 @@
+slug: eval-foo
+title: Evaluar Foo
+question: ¿Q?
+mode: full
+stage: reuse
+status: done
+schema_version: 1
+judge:
+  explore:
+    passed: true
+    scores:
+      evidence: true
+    model: legacy-model
+    provider: legacy-provider
+    unknown_scalar: preserve-me
+    unknown_nested:
+      threshold: 0.73
+  future-stage:
+    verdict: future-verdict
+    payload:
+      values:
+        - 1
+        - 2
+future_top_level:
+  owner_system: legacy

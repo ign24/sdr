@@ -1,0 +1,23 @@
+schema_version: 1
+agent: hermes
+product: NousResearch/hermes-agent
+status: documented
+adapter: agent-skills
+format: agent-skills
+canonical_skills: ../../skills
+skills:
+  - sdr-new
+  - sdr-intake
+  - sdr-explore
+  - sdr-probe
+  - sdr-transfer
+  - sdr-reuse
+  - sdr-status
+discovery:
+  local: ~/.hermes/skills
+  external: skills.external_dirs
+installation: external-dirs
+supports_external_dirs: true
+runtime_plugin: false
+runtime_dependencies: []
+official_docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/skills

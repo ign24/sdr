@@ -1,0 +1,9 @@
+slug: synthetic-light
+title: Evaluación sintética de un clasificador de reglas
+question: ¿Conviene evaluar un clasificador determinístico para ordenar tarjetas ficticias?
+mode: light
+owner: Example Researcher
+timebox: 2
+approval:
+  by: Example Reviewer
+  date: 2026-07-01

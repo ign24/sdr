@@ -1,0 +1,23 @@
+schema_version: 2
+claims:
+  - claim_id: old-semantic-claim
+    note_path: notes/n1.md
+    source_id: S1
+    claim_text: Foo reduce latencia a 100 ms.
+    verdict: supported
+    quote: Foo reduce latencia a 100 ms.
+    reason: semantic judge accepted it
+    model: legacy-model
+    provider_payload:
+      confidence: 0.97
+      unknown_nested:
+        - keep
+resolutions:
+  - claim_id: old-semantic-claim
+    by: legacy-reviewer
+    reason: accepted before versioned identities
+    date: 2025-01-02
+legacy:
+  - kind: provider_metadata
+    opaque:
+      keep: true

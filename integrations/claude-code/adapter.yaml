@@ -1,0 +1,20 @@
+schema_version: 1
+agent: claude-code
+status: documented
+adapter: agent-skills
+format: agent-skills
+canonical_skills: ../../skills
+skills:
+  - sdr-new
+  - sdr-intake
+  - sdr-explore
+  - sdr-probe
+  - sdr-transfer
+  - sdr-reuse
+  - sdr-status
+discovery:
+  project: .claude/skills
+  user: ~/.claude/skills
+installation: canonical-symlink
+runtime_dependencies: []
+official_docs: https://code.claude.com/docs/en/skills

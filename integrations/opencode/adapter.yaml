@@ -1,0 +1,20 @@
+schema_version: 1
+agent: opencode
+status: documented
+adapter: sdr
+format: agent-skills
+canonical_skills: ../../skills
+skills:
+  - sdr-new
+  - sdr-intake
+  - sdr-explore
+  - sdr-probe
+  - sdr-transfer
+  - sdr-reuse
+  - sdr-status
+discovery:
+  project: .opencode/skills
+  user: ~/.config/opencode/skills
+installation: canonical-symlink
+runtime_dependencies: []
+official_docs: https://opencode.ai/docs/skills/

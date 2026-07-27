@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Python ${{ matrix.python-version }} on Ubuntu
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      # v5.6.0: https://github.com/actions/setup-python/releases/tag/v5.6.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python-version }}
+      # v6.0.0: https://github.com/actions/setup-go/releases/tag/v6.0.0
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00
+        with:
+          go-version: "1.24.x"
+      # v6.7.0: https://github.com/astral-sh/setup-uv/releases/tag/v6.7.0
+      - uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4
+        with:
+          version: "0.10.2"
+      - run: uv sync --locked --all-extras --dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest
+      - run: uv run python -m sdr.readme_parity .
+      - run: uv run python -m sdr.skill_validation .
+      - run: uv run python -m sdr.integration_validation validate .
+      - run: npm install --global @fission-ai/openspec@1.2.0
+      - run: openspec validate --specs --strict --no-interactive
+      - name: Validate workflow syntax
+        # v1.7.7, tag commit 03d0035246f3e81f36aed592ffb4bebf33a03106.
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+
+  package:
+    name: Build and inspect distributions
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4
+        with:
+          version: "0.10.2"
+      - run: uv sync --locked --all-extras --dev
+      - run: uv build
+      - run: uv run twine check dist/*
+      - run: uv run python -m sdr.artifact_audit dist/*
+      - name: Isolated wheel and sdist smoke tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          index=0
+          for artifact in dist/*; do
+            index=$((index + 1))
+            environment="$RUNNER_TEMP/artifact-$index"
+            workspace="$RUNNER_TEMP/smoke-$index"
+            uv venv --python 3.12 "$environment"
+            uv pip install --python "$environment/bin/python" "$artifact"
+            mkdir "$workspace"
+            (
+              cd "$workspace"
+              "$environment/bin/python" -I -c "from importlib.resources import files; import sdr; assert files('sdr').joinpath('templates/brief.md').is_file()"
+              "$environment/bin/sdr" --help
+              SDR_ROOT="$workspace/research" "$environment/bin/sdr" new artifact-smoke --title Smoke --question "Does the installed artifact run?" --no-commit
+              SDR_ROOT="$workspace/research" "$environment/bin/sdr" status artifact-smoke --json
+            )
+          done
+      # v4.6.2: https://github.com/actions/upload-artifact/releases/tag/v4.6.2
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: python-distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7

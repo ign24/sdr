@@ -1,0 +1,6 @@
+slug: failing-intake-owner
+title: Fixture de intake inválido
+question: ¿El brief declara todos sus metadatos?
+mode: light
+stage: intake
+expected_check: frontmatter

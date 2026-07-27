@@ -1,0 +1,20 @@
+schema_version: 1
+agent: codex
+status: documented
+adapter: agent-skills
+format: agent-skills
+canonical_skills: ../../skills
+skills:
+  - sdr-new
+  - sdr-intake
+  - sdr-explore
+  - sdr-probe
+  - sdr-transfer
+  - sdr-reuse
+  - sdr-status
+discovery:
+  project: .agents/skills
+  user: ~/.agents/skills
+installation: canonical-symlink
+runtime_dependencies: []
+official_docs: https://developers.openai.com/codex/build-skills/
