@@ -122,8 +122,8 @@ def test_bilingual_readmes_identify_mit() -> None:
     english = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
     spanish = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
 
-    assert "Licensed under the MIT License. See [LICENSE](LICENSE)." in english
-    assert "Licenciado bajo la Licencia MIT. Consulta [LICENSE](LICENSE)." in spanish
+    assert "[MIT License](LICENSE)" in english
+    assert "[Licencia MIT](LICENSE)" in spanish
 
 
 def test_unreleased_changelog_records_relicensing_without_revoking_historical_grants() -> None:

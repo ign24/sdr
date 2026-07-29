@@ -10,6 +10,9 @@ single source of truth is `src/sdr/__init__.py`.
 
 ### Added
 
+- Outcome-first English and Spanish onboarding, task-oriented documentation
+  homes, and a verified offline beginner tour based on the maintained synthetic
+  light fixture.
 - Public English documentation, security guidance, contribution governance, and
   maintenance validation instructions.
 - Public Spanish README and deterministic semantic parity validation for both
@@ -23,6 +26,10 @@ single source of truth is `src/sdr/__init__.py`.
 
 ### Changed
 
+- Public onboarding now states the alpha, source-only release boundary, provides
+  canonical GitHub and immutable-revision installation, and validates bilingual
+  navigation, fixture links, Git effects, confidence limits, and documented
+  agent status.
 - Current and future distributions are licensed under MIT; historical Apache-2.0 grants are not revoked.
 - Narrowed the documented Agent Skills adapter set to Claude Code, Codex, and
   OpenCode; removed Hermes Agent and OpenClaw adapters and support claims.

@@ -24,6 +24,7 @@ SDIST_FILES = {
     ".gitignore",
     ".gitleaks.toml",
     "AGENTS.md",
+    "assets/sdr-banner.png",
     "CHANGELOG.md",
     "CONTRIBUTING.md",
     "LICENSE",

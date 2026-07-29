@@ -1,242 +1,161 @@
+<p align="center">
+  <img src="assets/sdr-banner.png" alt="Spec-Driven Research">
+</p>
+
 # Spec-Driven Research
 
-Lee esta documentación en [English](README.md). Las guías en inglés y español
-se mantienen bajo los mismos checks de paridad semántica.
+[![CI](https://github.com/ign24/sdr/actions/workflows/ci.yml/badge.svg)](https://github.com/ign24/sdr/actions/workflows/ci.yml)
+[![Security](https://github.com/ign24/sdr/actions/workflows/security.yml/badge.svg)](https://github.com/ign24/sdr/actions/workflows/security.yml)
+[![Python CI: 3.12 | 3.13](https://img.shields.io/badge/Python_CI-3.12_%7C_3.13-3776AB?logo=python&logoColor=white)](https://github.com/ign24/sdr/actions/workflows/ci.yml)
+[![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-yellow.svg)](LICENSE)
+[![Estado: Alfa](https://img.shields.io/badge/Estado-Alfa-orange.svg)](CHANGELOG.md)
 
-Spec-Driven Research (SDR) es una CLI local que transforma una pregunta abierta
-de investigación en evidencia revisable y una decisión explícita. Cada
-investigación sigue un ciclo fijo, debe superar validaciones sobre sus artefactos
-y deja registro cuando cambia la evidencia. Está pensada para equipos que
-necesitan investigación aplicada repetible, no una carpeta desordenada de notas.
+[English](README.md)
 
-## Qué resuelve SDR
+**Transforma una pregunta abierta en una decisión revisable y un activo reutilizable.**
 
-SDR ayuda a un equipo a:
+SDR es una CLI local para investigación aplicada que necesita una cadena de
+evidencia visible:
 
-- formular una pregunta falsable y criterios medibles antes de investigar;
-- separar la exploración basada en fuentes de la validación ejecutable;
-- conservar evidencia, limitaciones, revisiones humanas y decisiones de retroceso;
-- producir un memo de decisión y un activo reutilizable antes del cierre;
-- ofrecer resultados JSON determinísticos a personas, scripts y agentes de código.
+`pregunta -> evidencia -> probe opcional -> decisión con aprobación humana -> activo reutilizable`
 
-SDR no es una base de datos fuente de verdad, un crawler web, un runtime de
-agentes ni una garantía de veracidad de las fuentes citadas. Valida la estructura
-declarada y la evidencia local. Las personas siguen siendo responsables de la
-calidad de las fuentes, la ejecución segura y la recomendación final.
+Cada investigación tiene un ciclo protegido, checks determinísticos, aprobación
+humana explícita y JSON estable para automatización. El resultado no es solo una
+carpeta de notas, sino una decisión cuya evidencia y limitaciones pueden revisarse.
 
-## Requisitos e instalación
+> **Software alfa, disponible solo desde el código fuente.** No hay release en GitHub
+> ni en PyPI. Instálalo desde el código fuente canónico en GitHub. Las
+> interfaces y los contratos de artefactos pueden cambiar antes del primer release.
 
-SDR requiere Python 3.12 o posterior.
+## Tour sintético de cinco minutos
 
-Instala el checkout como herramienta aislada con `uv`:
+Este ejemplo mantenido es inventado, sin red y en modo light. Registra una
+aprobación sintética explícita, no ejecuta un probe y completa el reuse obligatorio.
 
 ```bash
-uv tool install .
+git clone https://github.com/ign24/sdr.git
+cd sdr
+uv sync --locked --all-extras --dev
+TOUR_ROOT="$(mktemp -d)/research"
+uv run python examples/runner.py light-complete --root "$TOUR_ROOT"
+SDR_ROOT="$TOUR_ROOT" uv run sdr status synthetic-light --json
+```
+
+El runner imprime `synthetic-light: done`. El JSON de status muestra `"mode":
+"light"`, `"stage": "reuse"`, `"status": "done"` y la aprobación de `Example
+Reviewer`. Inspecciona la evidencia materializada en:
+
+- `$TOUR_ROOT/synthetic-light/brief.md`
+- `$TOUR_ROOT/synthetic-light/notes/landscape.md`
+- `$TOUR_ROOT/synthetic-light/decision-memo.md`
+- `$TOUR_ROOT/synthetic-light/assets/checklist.md`
+
+Sigue la [guía inicial](docs/getting-started.es.md) para ejecutar el mismo fixture
+con la CLI pública, incluido `sdr approve` explícito y `--no-commit` en cada
+transición que podría crear un commit.
+
+## Instalación desde el código fuente
+
+SDR requiere Python 3.12 o posterior. Instala el código fuente canónico actual:
+
+```bash
+uv tool install "git+https://github.com/ign24/sdr"
 sdr --help
 ```
 
-Para desarrollar el proyecto, crea el entorno bloqueado:
+Para una instalación reproducible, reemplaza `REVISION` por un SHA completo:
 
 ```bash
-uv sync --all-extras --dev
-uv run sdr --help
+REVISION=REEMPLAZAR_POR_SHA_COMPLETO
+uv tool install "git+https://github.com/ign24/sdr@${REVISION}"
 ```
 
-También puedes instalar el checkout con `pip`:
+Desde un checkout existente, `uv tool install .` ofrece la instalación aislada.
+`python -m pip install .` también instala ese checkout. Para contribuir, usa
+`uv sync --locked --all-extras --dev`; la extracción de snapshots está en el
+extra opcional `snapshot`. Son instalaciones desde fuente, no desde un índice.
 
-```bash
-python -m pip install .
-sdr --help
-```
+## Elige un modo
 
-La extracción de snapshots es opcional. Desde un checkout se instala con
-`python -m pip install '.[snapshot]'`.
-
-## Inicio rápido
-
-Ejecuta estos pasos dentro de un repositorio Git. Por defecto, las transiciones
-del ciclo crean commits acotados. Agrega `--no-commit` a los comandos que cambian
-estado cuando no quieras ese efecto.
-
-```bash
-sdr new example-study \
-  --title "Evaluate a data export approach" \
-  --question "Which approach meets the stated reliability and maintenance criteria?" \
-  --mode full \
-  --no-commit
-```
-
-Edita `research/example-study/brief.md` sin alterar su frontmatter ni las
-secciones obligatorias. Después valida y consulta la salida estructurada:
-
-```bash
-sdr check example-study --json
-sdr advance example-study --no-commit
-sdr status example-study --json
-```
-
-En cada etapa posterior, completa el artefacto generado, ejecuta la verificación
-específica cuando corresponda, corre `check` y luego `advance`. La
-[guía del workflow](docs/workflow.md) muestra el recorrido completo.
-
-## Ciclo y modos
-
-Las cinco etapas son:
-
-| Etapa | Propósito | Evidencia principal |
+| Modo | Ciclo | Cuándo usarlo |
 | --- | --- | --- |
-| `intake` | Definir pregunta, hipótesis, alcance, criterios y riesgos de adopción. | `brief.md` |
-| `explore` | Comparar alternativas con fuentes fechadas, clasificadas y trazables. | `notes/*.md` y snapshots |
-| `probe` | Probar los criterios con código o comandos reproducibles. | `probe/results.md` y artefactos de `probe/` |
-| `transfer` | Recomendar una decisión respaldada por evidencia para una audiencia definida. | `decision-memo.md` |
-| `reuse` | Empaquetar al menos un resultado reutilizable. | `assets/*.md` |
+| `light` | `intake -> explore -> transfer -> reuse -> done` | La comparación basada en fuentes y la revisión humana son suficientes. No requiere probe; reuse sigue siendo obligatorio. |
+| `full` | `intake -> explore -> probe -> transfer -> reuse -> done` | La decisión necesita evidencia ejecutable de un probe reproducible. |
 
-El modo full recorre `intake -> explore -> probe -> transfer -> reuse -> done`.
-El modo light recorre `intake -> explore -> transfer -> reuse -> done`. Light
-omite `probe`, pero no vuelve opcional a `reuse`. Usa full cuando necesites una
-prueba ejecutable.
+Las cinco etapas son `intake`, `explore`, `probe`, `transfer` y `reuse`. Los
+artefactos, guards y transiciones se definen en la
+[guía del workflow](docs/workflow.md).
 
-## Controles de validación
+## Límites de confianza
 
-SDR presenta los controles según este orden conceptual de evidencia:
-**Estructural**, **Evidential**, **Anclaje textual**, **Ejecutable**,
-**Consistencia de hashes** y aprobación **HITL**. Antes de ejecutar los controles
-de la etapa actual y cambiar el estado, `advance` comprueba la consistencia de
-los hashes almacenados.
+SDR valida la estructura declarada y la evidencia local. No demuestra la verdad
+de las fuentes ni ofrece garantía de veracidad del material citado. Las personas
+siguen siendo responsables de la calidad de las fuentes, la ejecución segura,
+la interpretación y la recomendación final.
 
-| Control | Comando | Etapa | ¿Bloquea `advance`? | Qué establece |
-| --- | --- | --- | --- | --- |
-| Estructural | `sdr check` | Todas | Sí | Existen los archivos, frontmatter, secciones y reglas de etapa obligatorios. |
-| Evidential | `sdr check` | Principalmente explore/probe/transfer | Sí | Fuentes, referencias a criterios, artefactos y política de enlaces cumplen reglas determinísticas. |
-| Anclaje textual | `sdr verify-claims` | Explore | Sí | Los claims factuales `[S<n>]` coinciden con snapshots locales vigentes o tienen una resolución humana explícita. |
-| Ejecutable | `sdr verify-probe` | Probe | Sí | El comando declarado terminó bien, coincidió con `verify.expect` y conserva un hash vigente. |
-| Consistencia de hashes | `sdr advance` y reporte de consistencia de `sdr check` | Etapas ya validadas | Sí | Los artefactos validados no cambiaron silenciosamente. |
-| HITL | `sdr approve` | Transfer | Sí | Una persona aprobó el memo de decisión vigente. |
-| Context Graph | `sdr context ...` | Cualquiera | No | Cobertura, relaciones, exports y consultas determinísticas auxiliares; no es trazabilidad completa. |
+Los controles siguen este orden conceptual: **Estructural**, **Evidential**,
+**Anclaje textual**, **Ejecutable**, **Consistencia de hashes** y **HITL**.
+`advance` comprueba la consistencia antes de los controles de la etapa. El
+Context Graph opcional es no bloqueante y no representa trazabilidad completa.
 
-`check` ejecuta el gate estructural y evidencial para una etapa. Puede capturar
-snapshots faltantes de explore salvo que se use `--offline`, pero nunca avanza
-la etapa. `advance` coordina los controles bloqueantes, guarda el hash de
-validación, cambia la etapa y puede crear un commit. `verify-claims` y
-`verify-probe` producen evidencia explícita; `advance` no ejecuta comandos del
-probe. `approve` registra una decisión humana, no un puntaje automático.
+- Usa `[S<n>]` para claims factuales destinados al matching local determinístico.
+- `[cf. S<n>]` es contextual: no crea un claim ni entra al matching textual. El
+  matching no usa modelos.
+- `sdr resolve-claim` registra una revisión humana acotada; no reemplaza ni
+  sustituye a `sdr approve` en transfer.
+- `sdr check --offline` omite los checks de red y la captura automática de
+  snapshots. Los checks omitidos se reportan como omitidos, no aprobados. Por
+  ejemplo: `uv run sdr check example-study --offline`.
+- Un probe exige `verify.action: run`; prefiere `verify.argv`. SDR ejecuta `argv`
+  directamente, sin un shell. Esto no crea un sandbox ni vuelve confiable al
+  ejecutable.
 
-`[cf. S<n>]` es una referencia contextual. Valida la fuente declarada, pero no
-crea un claim ni entra al matching textual. El anclaje textual no usa modelos.
-`resolve-claim` registra una revisión humana acotada a la identidad vigente de un
-claim; no reemplaza ni sustituye a `approve` en transfer.
+Antes de usar fuentes o comandos reales, lee el [modelo de evidencia](docs/evidence-model.md),
+la [referencia de validación](docs/validation.md) y el
+[modelo de seguridad](docs/security-model.md). Trata Notes, Snapshots,
+Repositories, URLs, Probe commands, Git, credenciales y el entorno anfitrión
+como límites de confianza.
 
-El modo offline omite los checks de red y la captura automática de snapshots.
-Los checks omitidos se reportan como omitidos, no aprobados. El matching textual
-sigue necesitando snapshots locales existentes:
+## Comportamiento de Git
 
-```bash
-uv run sdr check example-study --offline
-```
-
-El Context Graph es opcional y no bloqueante. Resume relaciones seleccionadas,
-pero no representa trazabilidad completa ni es requisito para `advance`. Consulta
-[Modelo de evidencia](docs/evidence-model.md) y [Validación](docs/validation.md).
-
-## Resumen de comandos
-
-| Objetivo | Comandos | Modifica archivos o estado | Red | Git por defecto |
-| --- | --- | --- | --- | --- |
-| Crear trabajo | `sdr new` | Sí | No | Commit salvo `--no-commit` |
-| Validar una etapa | `sdr check` | Puede capturar snapshots de explore | Checks de enlaces y captura salvo offline | No |
-| Capturar y anclar fuentes | `sdr snapshot`, `sdr verify-claims`, `sdr resolve-claim` | Sí | `sdr snapshot` usa la red | No |
-| Ejecutar un probe | `sdr verify-probe` | Ejecuta un proceso y guarda metadatos del resultado | Depende del comando | No |
-| Avanzar o retroceder | `sdr advance`, `sdr reopen`, `sdr drop` | Sí | `sdr advance` puede comprobar enlaces | Commit salvo `--no-commit` |
-| Aprobar transfer | `sdr approve` | Sí | Checks de enlaces opcionales | No |
-| Reportar | `sdr status`, `sdr index`, `sdr doctor` | `sdr index` escribe `research/INDEX.md` | No | No |
-| Consolidar | `sdr archive` | Escribe `knowledge/<slug>.md` | No | Commit salvo `--no-commit` |
-| Grafo auxiliar | `sdr context build/inspect/trace/check/export/query` | Build/export escriben archivos derivados | No | No |
-| Migrar metadatos legacy | `sdr migrate` | Sí | Captura fuentes declaradas | No |
-
-Usa `--json` donde esté disponible para obtener una salida estructurada estable.
-La [referencia de la CLI](docs/cli-reference.md) enumera todas las opciones,
-guards y efectos secundarios.
-
-## Ejecución de probes
-
-La verificación del probe debe declarar `verify.action: run` y `verify.expect`
-en `probe/results.md`. Es preferible usar una lista `argv`:
-
-```yaml
-verify:
-  action: run
-  argv: ["python", "verify.py"]
-  expect: "PASS"
-  environment: clean
-```
-
-SDR ejecuta `argv` directamente, sin un shell, usando `probe/` como directorio
-de trabajo. Un string legacy `command` se separa en argumentos y también se
-ejecuta sin un shell. Esto impide la expansión del shell, pero no vuelve seguro
-al ejecutable. Revisa cada probe y prefiere `environment: clean`.
-
-## Archivo y reapertura
-
-`sdr archive <slug>` acepta únicamente investigaciones `done` o `dropped`,
-escribe un artefacto conciso de conocimiento y marca la investigación como
-archivada. `sdr reopen <slug> --to <stage> --reason <text>` solo retrocede,
-registra el motivo, invalida los hashes afectados y puede reactivar trabajo
-en estado `done`.
-
-Ambos comandos crean commits de transición por defecto. Usa `--no-commit` cuando
-el operador, el sistema de CI o el agente anfitrión administren el historial Git.
+`new`, `advance`, `reopen`, `drop` y `archive` crean commits por defecto. Usa
+`--no-commit` cuando tú, CI o un agente controlen el historial Git. `check`,
+`approve` y los comandos de evidencia o reporte no crean commits. La
+[referencia de la CLI](docs/cli-reference.md) es la fuente canónica sobre
+mutaciones, red y guards.
 
 ## Integraciones con agentes
 
-La distribución instalada incluye recursos de paquete para Claude Code, Codex y
-OpenCode. Instala las siete skills canónicas en el directorio de descubrimiento
-del proyecto con:
+SDR empaqueta siete skills canónicas de etapa. Exactamente tres adaptadores de
+agentes están documentados actualmente:
 
-```bash
-sdr integrations install --destination PATH_TO_SKILLS
-```
-
-| Agente | Destino del proyecto | Estado actual |
+| Agente | Instalación en el proyecto actual | Estado |
 | --- | --- | --- |
-| Claude Code | `.claude/skills` | `documented` |
-| Codex | `.agents/skills` | `documented` |
-| OpenCode | `.opencode/skills` | `documented` |
+| Claude Code | `sdr integrations install --destination .claude/skills` | `documented` |
+| Codex | `sdr integrations install --destination .agents/skills` | `documented` |
+| OpenCode | `sdr integrations install --destination .opencode/skills` | `documented` |
 
-El instalador copia recursos de skills equivalentes byte por byte desde el
-paquete SDR instalado; no depende de rutas del checkout. `SDR_ROOT` controla
-únicamente el almacenamiento de investigación y no es una fuente de integración
-ni un destino de instalación.
+La forma general es `sdr integrations install --destination PATH_TO_SKILLS`.
+El instalador copia recursos del paquete y no usa `SDR_ROOT`, que solo controla
+el almacenamiento de investigación. `documented` indica que existen guías de
+descubrimiento y checks determinísticos, no un E2E del host. `verified` exige
+evidencia E2E registrada y compatible por versión; `experimental` indica un
+contrato provisional. Consulta [integraciones](docs/integrations.md).
 
-`documented` significa que existen instrucciones de descubrimiento y checks
-determinísticos del adaptador, pero no se registró un E2E completo con el host.
-`verified` exige evidencia registrada y compatible por versión del
-descubrimiento E2E del host y del ciclo con la CLI instalada. `experimental`
-identifica un contrato incompleto o provisional. Los tres adaptadores actuales
-permanecen en estado `documented`; ninguno afirma tener un E2E verificado con el
-host. Consulta [Integraciones](docs/integrations.md).
+## Encuentra la documentación adecuada
 
-## Seguridad y limitaciones
+Empieza en la [documentación orientada a tareas](docs/README.es.md).
 
-Trata notas, snapshots, repositorios, URLs, comandos de probe y cambios Git
-generados como límites de confianza independientes. SDR bloquea destinos HTTP no
-públicos, limita redirects y tamaño de snapshots, ejecuta probes sin un shell y
-no hereda variables de proxy en su propio cliente HTTP. Estos controles no
-demuestran que una fuente sea verdadera, no impiden que un ejecutable elegido
-actúe de forma maliciosa, no detectan todas las credenciales ni crean un sandbox
-para el host.
+| Objetivo | Guía canónica |
+| --- | --- |
+| Completar el ciclo mínimo soportado | [Primeros pasos](docs/getting-started.es.md) |
+| Entender etapas y retrocesos | [Workflow](docs/workflow.md) |
+| Consultar `sdr new`, `sdr check`, `sdr advance`, `sdr status`, `sdr snapshot`, `sdr verify-claims`, `sdr resolve-claim`, `sdr verify-probe`, `sdr approve`, `sdr reopen`, `sdr drop`, `sdr archive`, `sdr index`, `sdr doctor`, `sdr migrate` o `sdr context` | [Referencia de la CLI](docs/cli-reference.md) |
+| Evaluar claims y límites de evidencia | [Modelo de evidencia](docs/evidence-model.md) |
+| Revisar amenazas y límites de confianza | [Modelo de seguridad](docs/security-model.md) y [SECURITY.md](SECURITY.md) |
+| Instalar skills para agentes | [Integraciones](docs/integrations.md) |
+| Validar una contribución | [Mantenimiento y validación](docs/validation.md) |
+| Entender el estado de publicación | [Releasing](docs/releasing.md) |
 
-Mantén las credenciales fuera de los artefactos de investigación. Revisa los
-comandos antes de ejecutarlos, inspecciona los archivos generados antes de
-publicarlos y usa entornos con privilegios mínimos. Lee el
-[Modelo de seguridad](docs/security-model.md) y [SECURITY.md](SECURITY.md).
-
-## Contribuir
-
-[CONTRIBUTING.md](CONTRIBUTING.md) describe los requisitos de OpenSpec, TDD,
-calidad y contenido público. Quienes contribuyan mediante agentes también deben
-seguir [AGENTS.md](AGENTS.md). Los checks de mantenimiento están en
-[docs/validation.md](docs/validation.md).
-
-## Licencia
-
-Licenciado bajo la Licencia MIT. Consulta [LICENSE](LICENSE).
+Las contribuciones siguen [CONTRIBUTING.md](CONTRIBUTING.md) y el trabajo con
+agentes también sigue [AGENTS.md](AGENTS.md). SDR usa la [Licencia MIT](LICENSE).

@@ -136,6 +136,11 @@ def test_public_documentation_set_includes_both_readmes():
     expected = (
         "README.md",
         "README.es.md",
+        "assets/sdr-banner.png",
+        "docs/README.md",
+        "docs/README.es.md",
+        "docs/getting-started.md",
+        "docs/getting-started.es.md",
         "AGENTS.md",
         "CONTRIBUTING.md",
         "SECURITY.md",
@@ -147,9 +152,19 @@ def test_public_documentation_set_includes_both_readmes():
         "docs/security-model.md",
         "docs/integrations.md",
         "docs/validation.md",
+        "docs/releasing.md",
     )
     for filename in expected:
         assert (ROOT_DIR / filename).is_file(), filename
+
+
+def test_root_readmes_reserve_shared_replaceable_banner_slot():
+    marker = '<img src="assets/sdr-banner.png" alt="Spec-Driven Research">'
+
+    for filename in ("README.md", "README.es.md"):
+        text = (ROOT_DIR / filename).read_text(encoding="utf-8")
+        assert marker in text
+        assert text.index(marker) < text.index("# Spec-Driven Research")
 
 
 def test_readme_documents_real_modes_commands_and_probe_execution_contract():

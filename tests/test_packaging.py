@@ -40,6 +40,7 @@ def test_package_metadata_uses_sdr_version_as_single_source(tmp_path):
     wheel = next(dist.glob("spec_driven_research-*.whl"))
     with zipfile.ZipFile(wheel) as archive:
         assert "sdr/py.typed" in archive.namelist()
+        assert not any(name.endswith("sdr-banner.png") for name in archive.namelist())
         metadata_name = next(
             name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
         )
@@ -60,6 +61,7 @@ def test_sdist_contains_public_package_files_and_excludes_active_changes(tmp_pat
         names = archive.getnames()
 
     assert any(name.endswith("/src/sdr/py.typed") for name in names)
+    assert any(name.endswith("/assets/sdr-banner.png") for name in names)
     assert not any("/openspec/changes/" in name for name in names)
 
 

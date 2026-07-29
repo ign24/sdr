@@ -145,6 +145,29 @@ def test_sdist_rejects_prohibited_material_and_redacts_private_paths(tmp_path: P
     assert private_path not in output
 
 
+def test_sdist_allows_only_the_public_banner_asset(tmp_path: Path) -> None:
+    sdist = tmp_path / "spec_driven_research-1.0.tar.gz"
+    with tarfile.open(sdist, "w:gz") as archive:
+        for name in ("assets/sdr-banner.png", "assets/private.png"):
+            content = b"safe image bytes"
+            info = tarfile.TarInfo(f"spec_driven_research-1.0/{name}")
+            info.size = len(content)
+            archive.addfile(info, BytesIO(content))
+
+    findings = audit_artifact(sdist)
+
+    assert not any(
+        item.code == "unexpected-member"
+        and item.path == "spec_driven_research-1.0/assets/sdr-banner.png"
+        for item in findings
+    )
+    assert any(
+        item.code == "unexpected-member"
+        and item.path == "spec_driven_research-1.0/assets/private.png"
+        for item in findings
+    )
+
+
 def test_built_wheel_and_sdist_pass_the_artifact_contract(tmp_path: Path) -> None:
     dist = tmp_path / "dist"
     subprocess.run(

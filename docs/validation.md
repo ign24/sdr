@@ -37,19 +37,32 @@ installs each artifact in a separate environment for smoke tests.
 
 ## Documentation checks
 
-`tests/test_templates.py` verifies the public documentation set, validation
-terminology, full/light lifecycle, offline example, contextual citation
-semantics, approval separation, trust boundaries, and probe execution contract.
-`sdr.readme_parity` verifies semantic coverage across `README.md` and
-`README.es.md`, with actionable findings and no line-by-line translation rule.
+`tests/test_templates.py` verifies the public documentation inventory,
+validation terminology, full/light lifecycle, offline example, contextual
+citation semantics, approval separation, trust boundaries, and probe execution
+contract. `tests/test_examples_e2e.py` runs the maintained synthetic light and
+full fixtures offline and verifies their final states without modifying them.
+`sdr.readme_parity` verifies concept coverage across all three bilingual pairs:
+the root READMEs, documentation homes, and beginner guides. It also resolves
+their local links and fixture references and rejects package-index installation
+claims while publication is disabled. Findings are actionable; equivalent
+nonliteral translations are accepted.
 `tests/test_packaging.py` verifies README, license, author, version, and changelog
 metadata.
 
 Add public maintenance guidance here and keep assertions tied to observable
-behavior. When either README changes, preserve the shared contract in both and run:
+behavior. When any onboarding pair or the synthetic tour changes, preserve the
+shared contract in both languages and run the focused gates first:
 
 ```bash
+uv run pytest tests/test_readme_parity.py tests/test_templates.py tests/test_examples_e2e.py
 uv run python -m sdr.readme_parity .
+uv run python examples/runner.py light-complete --root "$(mktemp -d)/research"
+```
+
+Then run the broader documentation and repository checks:
+
+```bash
 uv run python -m sdr.skill_validation .
 uv run python -m sdr.integration_validation validate .
 npm install --global @fission-ai/openspec@1.2.0

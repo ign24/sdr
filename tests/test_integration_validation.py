@@ -286,9 +286,9 @@ def test_validator_rejects_additional_public_status_table_rows(tmp_path: Path) -
     readme = root / "README.md"
     readme.write_text(
         readme.read_text(encoding="utf-8").replace(
-            "| OpenCode | `.opencode/skills` | `documented` |",
-            "| OpenCode | `.opencode/skills` | `documented` |\n"
-            "| Other Agent | `.other/skills` | `documented` |",
+            "| OpenCode | `sdr integrations install --destination .opencode/skills` | `documented` |",
+            "| OpenCode | `sdr integrations install --destination .opencode/skills` | `documented` |\n"
+            "| Other Agent | `sdr integrations install --destination .other/skills` | `documented` |",
         ),
         encoding="utf-8",
     )
