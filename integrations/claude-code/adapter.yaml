@@ -15,6 +15,9 @@ skills:
 discovery:
   project: .claude/skills
   user: ~/.claude/skills
-installation: canonical-symlink
+installation: package-resource-copy
 runtime_dependencies: []
 official_docs: https://code.claude.com/docs/en/skills
+status_evidence:
+  schema_version: 1
+  host_e2e:

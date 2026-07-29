@@ -24,17 +24,21 @@ structured CLI output, and preserve full/light mode and human-approval semantics
 - **THEN** it directs the agent to the current-stage workflow
 
 ### Requirement: Optional supported adapters
-The repository MUST document adapters for Claude Code, OpenCode, Codex, OpenClaw, and Hermes Agent
-without coupling the Python runtime to any one platform.
+The supported public adapter set MUST consist exactly of Claude Code, Codex, and OpenCode without
+coupling the Python runtime to any one platform.
 
 #### Scenario: Use SDR without an agent platform
 - **WHEN** no supported agent is installed
 - **THEN** all core CLI commands remain available
 
-#### Scenario: Install one adapter
-- **WHEN** a user explicitly follows an adapter's installation instructions
+#### Scenario: Install one supported adapter
+- **WHEN** a user explicitly follows a Claude Code, Codex, or OpenCode adapter's installation instructions
 - **THEN** that platform can discover the canonical workflows
 - **THEN** the Python package remains unchanged
+
+#### Scenario: An unsupported adapter is exposed
+- **WHEN** validation finds an adapter directory, packaged descriptor, or public support claim outside the supported set
+- **THEN** validation identifies the unsupported agent and fails
 
 ### Requirement: Thin adapter contract
 Adapters MUST reference, link, or mechanically mirror canonical skills and MUST NOT independently

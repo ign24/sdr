@@ -110,6 +110,11 @@ uv run python -m sdr.artifact_audit dist/*
 gitleaks dir --redact --no-banner --max-archive-depth=1 dist
 ```
 
+Pass the candidate wheel and matching sdist to the artifact auditor together.
+Their independent content checks are preserved, and the paired checks compare
+packaged integration resources and bind the sdist's sanitized canary evidence
+to the exact wheel filename, version, and SHA-256 bytes.
+
 All external GitHub Actions are pinned to full commit SHAs. The workflow comments
 record their release tags; `.github/dependabot.yml` checks GitHub Actions and the
 Python/uv lock inputs weekly.

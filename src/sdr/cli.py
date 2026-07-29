@@ -19,6 +19,7 @@ import click
 from sdr import archive as archive_mod
 from sdr import audit as audit_mod
 from sdr import index as index_mod
+from sdr import integration_validation as integration_validation_mod
 from sdr import lifecycle, schema, trail
 from sdr import probe_verify as probe_verify_mod
 from sdr import snapshot as snapshot_mod
@@ -475,6 +476,37 @@ def context() -> None:
 
     Incluye un inventario global de fuentes; no representa lineage completo.
     """
+
+
+@main.group()
+def integrations() -> None:
+    """Install packaged integrations into an explicit agent discovery scope."""
+
+
+@integrations.command("install")
+@click.option(
+    "--destination",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Agent skill discovery directory.",
+)
+@click.option("--json", "as_json", is_flag=True)
+def integrations_install(destination: Path, as_json: bool) -> None:
+    """Install all packaged canonical skills without overwriting conflicts."""
+    try:
+        installed = integration_validation_mod.install_canonical_skills(destination)
+    except OSError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    payload = {
+        "destination": str(destination),
+        "installed": [path.name for path in installed],
+        "installed_count": len(installed),
+    }
+    if as_json:
+        click.echo(jsonlib.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        click.echo(f"installed {len(installed)} canonical skills in {destination}")
 
 
 @context.command("build")

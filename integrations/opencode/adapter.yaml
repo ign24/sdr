@@ -15,6 +15,9 @@ skills:
 discovery:
   project: .opencode/skills
   user: ~/.config/opencode/skills
-installation: canonical-symlink
+installation: package-resource-copy
 runtime_dependencies: []
 official_docs: https://opencode.ai/docs/skills/
+status_evidence:
+  schema_version: 1
+  host_e2e:

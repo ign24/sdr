@@ -7,22 +7,39 @@ agents. They do not change the deterministic CLI contract.
 
 | Adapter | Discovery approach | Status | Local E2E claimed? |
 | --- | --- | --- | --- |
-| Claude Code | Project or user Agent Skills links | `documented` | No |
-| Codex | Repository or user Agent Skills links | `documented` | No |
-| Hermes Agent | `skills.external_dirs` | `documented` | No |
-| OpenClaw | Workspace skill installation | `documented` | No |
-| OpenCode | Project or user Agent Skills links | `documented` | No |
+| Claude Code | Project or user Agent Skills directory | `documented` | No |
+| Codex | Repository or user Agent Skills directory | `documented` | No |
+| OpenCode | Project or user Agent Skills directory | `documented` | No |
 
 `documented` means official discovery behavior and installation instructions
 have been recorded and adapter metadata is validated. It does not mean the
 project executed a local end-to-end session with that agent.
 
+## Isolated discovery canaries
+
+The [sanitized canary evidence](../integrations/canary-evidence.json) is the
+machine-readable source for the canary date, exact wheel identity and digest,
+generic environment and host versions, execution policy, discovery results,
+lifecycle results, and limitations. Validation rejects a missing or malformed
+record, unsafe environment-specific material, adapter mismatches, unsupported
+prose digests, and results that exceed `documented` status. The standalone
+paired wheel/sdist artifact audit additionally reads this record from the sdist
+and rejects it unless its version, wheel filename, and SHA-256 match the actual
+candidate wheel bytes.
+
+The record establishes package-resource installation and only the locally
+observable discovery facts it names. Claude Code remains filesystem-only because
+the tested host exposed no offline skill-introspection command. No canary ran an
+SDR lifecycle, so none satisfies the complete installed-CLI lifecycle evidence
+required for `verified` status.
+
 ## Canonical skills
 
-The source of truth is `skills/sdr-new`, `sdr-intake`, `sdr-explore`,
+The authored source of truth is `skills/sdr-new`, `sdr-intake`, `sdr-explore`,
 `sdr-probe`, `sdr-transfer`, `sdr-reuse`, and `sdr-status`. Adapters must link,
-install, or reference those directories. Do not copy and modify skill content in
-an integration because copies drift from stage guards and CLI behavior.
+install, or reference those directories. Released wheels contain byte-equivalent
+package resources for installation; do not copy and modify skill content in an
+integration because modified copies drift from stage guards and CLI behavior.
 
 ## Validation and installation
 
@@ -31,12 +48,17 @@ Where the generated validator is supported:
 
 ```bash
 python -m sdr.integration_validation validate .
-python -m sdr.integration_validation install . --destination PATH_TO_SKILLS
+sdr integrations install --destination PATH_TO_SKILLS
 ```
 
-The installer creates missing links and refuses to overwrite conflicts. It does
+The installer copies all seven packaged skills as regular files and refuses the
+entire installation if any target conflicts. `SDR_ROOT` controls only research
+storage and is neither read nor written by installation. The installer does
 not write credentials, hooks, permissions, or general agent configuration.
-Agent platforms and linked skill directories remain separate trust boundaries.
+Agent platforms and installed skill directories remain separate trust boundaries.
+The module command `python -m sdr.integration_validation install ...` remains
+available for compatibility, but the installed `sdr` command is the primary
+installation interface and does not depend on how `python` resolves on `PATH`.
 
 ## Runtime contract
 

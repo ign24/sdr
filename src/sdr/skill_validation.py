@@ -27,6 +27,7 @@ ACTIVE_COMMANDS = frozenset(
         "check",
         "drop",
         "index",
+        "integrations",
         "new",
         "reopen",
         "resolve-claim",

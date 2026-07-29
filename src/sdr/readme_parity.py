@@ -34,7 +34,7 @@ CRITICAL_COMMANDS = (
     "sdr context",
 )
 STAGES = ("intake", "explore", "probe", "transfer", "reuse")
-INTEGRATIONS = ("Claude Code", "Codex", "Hermes Agent", "OpenClaw", "OpenCode")
+INTEGRATIONS = ("Claude Code", "Codex", "OpenCode")
 REQUIRED_LINKS = (
     "docs/workflow.md",
     "docs/cli-reference.md",
@@ -52,6 +52,14 @@ SHARED_CONTRACTS = {
     "five-stages": STAGES,
     "modes": ("full", "light"),
     "integrations": INTEGRATIONS,
+    "integration-installation": (
+        "sdr integrations install --destination",
+        ".claude/skills",
+        ".agents/skills",
+        ".opencode/skills",
+        "SDR_ROOT",
+    ),
+    "integration-statuses": ("`documented`", "`verified`", "`experimental`"),
     "status": ("sdr status", "--json"),
     "links": REQUIRED_LINKS,
     "compatibility": ("Python 3.12", "uv tool install .", "python -m pip install ."),

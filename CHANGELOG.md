@@ -16,6 +16,15 @@ single source of truth is `src/sdr/__init__.py`.
   language guides.
 - Read-only Linux CI for Python 3.12 and 3.13, strict specification checks,
   dependency and secret scanning, and isolated wheel/sdist release audits.
+- Sanitized machine-readable discovery-canary evidence for Claude Code, Codex,
+  and OpenCode, with fail-closed validation against public integration claims.
+- An installed `sdr integrations install --destination PATH` command for copying
+  all seven packaged canonical skills from isolated tool environments.
+
+### Changed
+
+- Narrowed the documented Agent Skills adapter set to Claude Code, Codex, and
+  OpenCode; removed Hermes Agent and OpenClaw adapters and support claims.
 
 ## [0.1.0] - 2026-07-27
 

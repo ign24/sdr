@@ -43,6 +43,13 @@ warnings when explicitly invoked. Context commands remain auxiliary and
 non-blocking: lifecycle `advance` does not call them, and the graph is not
 complete lineage.
 
+## Integration commands
+
+`sdr integrations install --destination PATH [--json]` copies all seven
+canonical skills from the installed package into an explicit agent discovery
+directory. It preflights every target and refuses the whole installation on any
+conflict. It does not read `SDR_ROOT` or write agent configuration.
+
 ## Retired command
 
 `sdr judge` is a tombstone that exits with guidance. Use `verify-claims` for

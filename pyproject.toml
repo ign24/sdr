@@ -60,6 +60,21 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/sdr"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"skills/sdr-explore/SKILL.md" = "sdr/resources/skills/sdr-explore/SKILL.md"
+"skills/sdr-intake/SKILL.md" = "sdr/resources/skills/sdr-intake/SKILL.md"
+"skills/sdr-new/SKILL.md" = "sdr/resources/skills/sdr-new/SKILL.md"
+"skills/sdr-probe/SKILL.md" = "sdr/resources/skills/sdr-probe/SKILL.md"
+"skills/sdr-reuse/SKILL.md" = "sdr/resources/skills/sdr-reuse/SKILL.md"
+"skills/sdr-status/SKILL.md" = "sdr/resources/skills/sdr-status/SKILL.md"
+"skills/sdr-transfer/SKILL.md" = "sdr/resources/skills/sdr-transfer/SKILL.md"
+"integrations/claude-code/adapter.yaml" = "sdr/resources/integrations/claude-code/adapter.yaml"
+"integrations/codex/adapter.yaml" = "sdr/resources/integrations/codex/adapter.yaml"
+"integrations/opencode/adapter.yaml" = "sdr/resources/integrations/opencode/adapter.yaml"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/openspec/changes"]
+
 [tool.hatch.version]
 path = "src/sdr/__init__.py"
 

@@ -15,7 +15,6 @@ CAPABILITIES = {
 
 def test_public_capability_specs_are_consolidated_and_verifiable():
     assert {path.name for path in SPECS_ROOT.iterdir() if path.is_dir()} == CAPABILITIES
-    assert not (REPOSITORY_ROOT / "openspec" / "changes").exists()
 
     for capability in CAPABILITIES:
         spec = SPECS_ROOT / capability / "spec.md"

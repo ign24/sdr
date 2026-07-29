@@ -1,3 +1,5 @@
+import hashlib
+import json
 import subprocess
 import sys
 import tarfile
@@ -5,9 +7,79 @@ import zipfile
 from io import BytesIO
 from pathlib import Path
 
-from sdr.artifact_audit import audit_artifact, render_findings
+import pytest
+
+from sdr.artifact_audit import ArtifactFinding, audit_artifact, audit_artifacts, render_findings
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SKILL_RESOURCE_NAMES = {
+    f"sdr/resources/skills/{name}/SKILL.md"
+    for name in (
+        "sdr-explore",
+        "sdr-intake",
+        "sdr-new",
+        "sdr-probe",
+        "sdr-reuse",
+        "sdr-status",
+        "sdr-transfer",
+    )
+}
+ADAPTER_RESOURCE_NAMES = {
+    f"sdr/resources/integrations/{name}/adapter.yaml"
+    for name in ("claude-code", "codex", "opencode")
+}
+INTEGRATION_RESOURCE_NAMES = SKILL_RESOURCE_NAMES | ADAPTER_RESOURCE_NAMES
+
+
+def _sdist_resource_name(wheel_name: str) -> str:
+    return wheel_name.removeprefix("sdr/resources/")
+
+
+def _write_artifact_pair(
+    path: Path,
+    mismatched_resource: str | None = None,
+    *,
+    evidence: bytes | None = None,
+    include_evidence: bool = True,
+) -> tuple[Path, Path]:
+    wheel = path / "spec_driven_research-1.0-py3-none-any.whl"
+    sdist = path / "spec_driven_research-1.0.tar.gz"
+    canonical = {
+        name: f"canonical bytes for {name}\n".encode()
+        for name in sorted(INTEGRATION_RESOURCE_NAMES)
+    }
+
+    _write_wheel(wheel, "sdr/extra.py")
+    with zipfile.ZipFile(wheel, "a") as archive:
+        for name, content in canonical.items():
+            archive.writestr(
+                name,
+                b"different private payload\n" if name == mismatched_resource else content,
+            )
+
+    if evidence is None:
+        evidence = json.dumps(
+            {
+                "schema_version": 1,
+                "artifact": {
+                    "package_version": "1.0",
+                    "wheel_filename": wheel.name,
+                    "sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),
+                },
+            }
+        ).encode()
+
+    with tarfile.open(sdist, "w:gz") as archive:
+        for wheel_name, content in canonical.items():
+            name = f"spec_driven_research-1.0/{_sdist_resource_name(wheel_name)}"
+            info = tarfile.TarInfo(name)
+            info.size = len(content)
+            archive.addfile(info, BytesIO(content))
+        if include_evidence:
+            info = tarfile.TarInfo("spec_driven_research-1.0/integrations/canary-evidence.json")
+            info.size = len(evidence)
+            archive.addfile(info, BytesIO(evidence))
+    return wheel, sdist
 
 
 def _write_wheel(
@@ -82,7 +154,7 @@ def test_built_wheel_and_sdist_pass_the_artifact_contract(tmp_path: Path) -> Non
 
     artifacts = sorted(dist.iterdir())
     assert {path.suffix for path in artifacts} == {".gz", ".whl"}
-    assert all(audit_artifact(path) == [] for path in artifacts)
+    assert audit_artifacts(artifacts) == []
 
 
 def test_artifact_audit_requires_typed_package_marker(tmp_path: Path) -> None:
@@ -93,6 +165,157 @@ def test_artifact_audit_requires_typed_package_marker(tmp_path: Path) -> None:
         finding.code == "missing-member" and finding.path == "sdr/py.typed"
         for finding in audit_artifact(markerless)
     )
+
+
+def test_artifact_audit_requires_exact_integration_resource_set(tmp_path: Path) -> None:
+    wheel = tmp_path / "resources-1.0-py3-none-any.whl"
+    _write_wheel(wheel, "sdr/extra.py")
+    with zipfile.ZipFile(wheel, "a") as archive:
+        for name in sorted(INTEGRATION_RESOURCE_NAMES - {min(SKILL_RESOURCE_NAMES)}):
+            archive.writestr(name, "canonical\n")
+        archive.writestr("sdr/resources/integrations/opencode/README.md", "not packaged\n")
+        archive.writestr("sdr/resources/integrations/hermes/adapter.yaml", "unsupported\n")
+
+    findings = audit_artifact(wheel)
+
+    assert any(
+        finding.code == "missing-member" and finding.path == min(SKILL_RESOURCE_NAMES)
+        for finding in findings
+    )
+    assert any(
+        finding.code == "unexpected-member"
+        and finding.path == "sdr/resources/integrations/opencode/README.md"
+        for finding in findings
+    )
+    assert any(
+        finding.code == "unexpected-member"
+        and finding.path == "sdr/resources/integrations/hermes/adapter.yaml"
+        for finding in findings
+    )
+
+
+@pytest.mark.parametrize("resource_name", sorted(INTEGRATION_RESOURCE_NAMES))
+def test_artifact_audit_compares_wheel_resources_with_matching_sdist(
+    tmp_path: Path, resource_name: str
+) -> None:
+    wheel, sdist = _write_artifact_pair(tmp_path, resource_name)
+
+    findings = audit_artifacts([sdist, wheel])
+    reverse_findings = audit_artifacts([wheel, sdist])
+
+    mismatch = [item for item in findings if item.code == "resource-content-mismatch"]
+    assert mismatch == [ArtifactFinding(wheel.name, "resource-content-mismatch", resource_name)]
+    assert reverse_findings == findings
+    assert "different private payload" not in render_findings(findings)
+
+
+def test_paired_artifact_audit_requires_canary_evidence_in_matching_sdist(
+    tmp_path: Path,
+) -> None:
+    wheel, sdist = _write_artifact_pair(tmp_path, include_evidence=False)
+
+    findings = audit_artifacts([wheel, sdist])
+
+    assert (
+        ArtifactFinding(
+            wheel.name,
+            "missing-canary-evidence",
+            "integrations/canary-evidence.json",
+        )
+        in findings
+    )
+    assert not any(finding.code == "missing-canary-evidence" for finding in audit_artifact(wheel))
+    assert not any(finding.code == "missing-canary-evidence" for finding in audit_artifact(sdist))
+
+
+@pytest.mark.parametrize(
+    "evidence",
+    [
+        b"not JSON",
+        b"[]",
+        b'{"schema_version": 1, "artifact": null}',
+        b'{"schema_version": 1, "artifact": {"package_version": "1.0"}}',
+        b'{"schema_version": 1, "artifact": {"package_version": "1.0", '
+        b'"wheel_filename": "spec_driven_research-1.0-py3-none-any.whl", '
+        b'"sha256": "not-a-digest"}}',
+    ],
+)
+def test_paired_artifact_audit_rejects_malformed_canary_evidence(
+    tmp_path: Path, evidence: bytes
+) -> None:
+    wheel, sdist = _write_artifact_pair(tmp_path, evidence=evidence)
+
+    findings = audit_artifacts([wheel, sdist])
+
+    assert (
+        ArtifactFinding(
+            wheel.name,
+            "invalid-canary-evidence",
+            "integrations/canary-evidence.json",
+        )
+        in findings
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("package_version", "1.1"),
+        ("wheel_filename", "spec_driven_research-1.0-py3-none-linux_x86_64.whl"),
+    ],
+)
+def test_paired_artifact_audit_rejects_mismatched_canary_wheel_identity(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    wheel, _ = _write_artifact_pair(tmp_path)
+    artifact = {
+        "package_version": "1.0",
+        "wheel_filename": wheel.name,
+        "sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),
+    }
+    artifact[field] = value
+    evidence = json.dumps({"schema_version": 1, "artifact": artifact}).encode()
+    wheel, sdist = _write_artifact_pair(tmp_path, evidence=evidence)
+
+    findings = audit_artifacts([sdist, wheel])
+
+    assert (
+        ArtifactFinding(
+            wheel.name,
+            "canary-artifact-mismatch",
+            "integrations/canary-evidence.json",
+        )
+        in findings
+    )
+
+
+def test_paired_artifact_audit_rejects_stale_canary_digest_deterministically(
+    tmp_path: Path,
+) -> None:
+    stale_evidence = json.dumps(
+        {
+            "schema_version": 1,
+            "artifact": {
+                "package_version": "1.0",
+                "wheel_filename": "spec_driven_research-1.0-py3-none-any.whl",
+                "sha256": "0" * 64,
+            },
+        }
+    ).encode()
+    wheel, sdist = _write_artifact_pair(tmp_path, evidence=stale_evidence)
+
+    findings = audit_artifacts([wheel, sdist])
+    reverse_findings = audit_artifacts([sdist, wheel])
+
+    assert (
+        ArtifactFinding(
+            wheel.name,
+            "stale-canary-evidence",
+            "integrations/canary-evidence.json",
+        )
+        in findings
+    )
+    assert reverse_findings == findings
 
 
 def test_module_cli_audits_all_artifacts_without_sensitive_output(tmp_path: Path) -> None:

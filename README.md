@@ -187,11 +187,30 @@ operator, CI system, or host agent owns Git history.
 
 ## Agent integrations
 
-Adapters exist for Claude Code, Codex, Hermes Agent, OpenClaw, and OpenCode.
-Every current adapter is `documented`: discovery and installation are covered,
-but no adapter claims a local end-to-end agent run. The canonical skill content
-lives in `skills/sdr-*/SKILL.md`; adapters link or reference it rather than fork
-it. See [Integrations](docs/integrations.md).
+The installed distribution provides package resources for Claude Code, Codex,
+and OpenCode. Install all seven canonical skills into a project's discovery
+directory with:
+
+```bash
+sdr integrations install --destination PATH_TO_SKILLS
+```
+
+| Agent | Project destination | Current status |
+| --- | --- | --- |
+| Claude Code | `.claude/skills` | `documented` |
+| Codex | `.agents/skills` | `documented` |
+| OpenCode | `.opencode/skills` | `documented` |
+
+The installer copies byte-equivalent skill resources from the installed SDR
+package; it does not depend on checkout paths. `SDR_ROOT` controls only research
+storage and is not an integration source or installation destination.
+
+`documented` means discovery guidance and deterministic adapter checks exist,
+but no complete host E2E has been recorded. `verified` requires recorded,
+version-matched host E2E discovery and installed-CLI lifecycle evidence.
+`experimental` identifies an incomplete or provisional contract. All three
+current adapters remain `documented`; none claims verified host E2E. See
+[Integrations](docs/integrations.md).
 
 ## Security and limitations
 

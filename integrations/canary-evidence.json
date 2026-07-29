@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "recorded_on": "2026-07-28",
+  "artifact": {
+    "package_version": "0.1.0",
+    "wheel_filename": "spec_driven_research-0.1.0-py3-none-any.whl",
+    "sha256": "519f23d1ef3616fc087f642317c438ecb7494720607b58933a6076c93cdf0797"
+  },
+  "environment": {
+    "isolation": "env-i",
+    "home": "temporary",
+    "workspace": "temporary-outside-checkout",
+    "python_version": "3.14.3",
+    "os": "Linux",
+    "architecture": "x86_64"
+  },
+  "adapters": {
+    "claude-code": {
+      "host_version": "2.1.220",
+      "policy": {
+        "authentication": "no-credentials",
+        "model": "not-invoked",
+        "network": "not-used"
+      },
+      "discovery": {
+        "result": "filesystem-only"
+      },
+      "lifecycle": {
+        "result": "not-run"
+      },
+      "limitations": [
+        "The host reported no authentication, but exposed no offline skill-introspection command.",
+        "Installation and byte equivalence passed; host discovery and an SDR lifecycle were not run.",
+        "Network namespace isolation was unavailable; the local commands did not request network access."
+      ]
+    },
+    "codex": {
+      "host_version": "0.128.0",
+      "policy": {
+        "authentication": "no-credentials",
+        "model": "not-invoked",
+        "network": "not-used"
+      },
+      "discovery": {
+        "result": "discovered"
+      },
+      "lifecycle": {
+        "result": "not-run"
+      },
+      "limitations": [
+        "A local diagnostic exposed all seven project skills; no prompt was submitted to a model.",
+        "No host-driven SDR lifecycle was run.",
+        "Network namespace isolation was unavailable; the local diagnostic did not request network access."
+      ]
+    },
+    "opencode": {
+      "host_version": "1.18.9",
+      "policy": {
+        "authentication": "no-credentials",
+        "model": "not-invoked",
+        "network": "not-used"
+      },
+      "discovery": {
+        "result": "discovered"
+      },
+      "lifecycle": {
+        "result": "not-run"
+      },
+      "limitations": [
+        "A pure local diagnostic exposed all seven project skills without model invocation.",
+        "No host-driven SDR lifecycle was run.",
+        "Network namespace isolation was unavailable; the local diagnostic did not request network access."
+      ]
+    }
+  }
+}

@@ -15,6 +15,9 @@ skills:
 discovery:
   project: .agents/skills
   user: ~/.agents/skills
-installation: canonical-symlink
+installation: package-resource-copy
 runtime_dependencies: []
 official_docs: https://developers.openai.com/codex/build-skills/
+status_evidence:
+  schema_version: 1
+  host_e2e:

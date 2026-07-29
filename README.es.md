@@ -188,12 +188,32 @@ el operador, el sistema de CI o el agente anfitrión administren el historial Gi
 
 ## Integraciones con agentes
 
-Hay adaptadores para Claude Code, Codex, Hermes Agent, OpenClaw y OpenCode. Todos
-los adaptadores actuales tienen estado `documented`: su descubrimiento e
-instalación están documentados, pero ninguno afirma haber pasado una sesión E2E
-local con el agente. El contenido canónico vive en `skills/sdr-*/SKILL.md`; los
-adaptadores lo enlazan o referencian en vez de bifurcarlo. Consulta
-[Integraciones](docs/integrations.md).
+La distribución instalada incluye recursos de paquete para Claude Code, Codex y
+OpenCode. Instala las siete skills canónicas en el directorio de descubrimiento
+del proyecto con:
+
+```bash
+sdr integrations install --destination PATH_TO_SKILLS
+```
+
+| Agente | Destino del proyecto | Estado actual |
+| --- | --- | --- |
+| Claude Code | `.claude/skills` | `documented` |
+| Codex | `.agents/skills` | `documented` |
+| OpenCode | `.opencode/skills` | `documented` |
+
+El instalador copia recursos de skills equivalentes byte por byte desde el
+paquete SDR instalado; no depende de rutas del checkout. `SDR_ROOT` controla
+únicamente el almacenamiento de investigación y no es una fuente de integración
+ni un destino de instalación.
+
+`documented` significa que existen instrucciones de descubrimiento y checks
+determinísticos del adaptador, pero no se registró un E2E completo con el host.
+`verified` exige evidencia registrada y compatible por versión del
+descubrimiento E2E del host y del ciclo con la CLI instalada. `experimental`
+identifica un contrato incompleto o provisional. Los tres adaptadores actuales
+permanecen en estado `documented`; ninguno afirma tener un E2E verificado con el
+host. Consulta [Integraciones](docs/integrations.md).
 
 ## Seguridad y limitaciones
 

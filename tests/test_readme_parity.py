@@ -35,6 +35,23 @@ def test_validator_reports_missing_contract_with_actionable_message(tmp_path: Pa
     assert "sdr verify-probe" in finding.message
 
 
+def test_validator_requires_package_resource_integration_contract(tmp_path: Path) -> None:
+    root = _copy_readmes(tmp_path)
+    english = root / "README.md"
+    english.write_text(
+        english.read_text(encoding="utf-8").replace(
+            "sdr integrations install --destination", "python -m installer"
+        ),
+        encoding="utf-8",
+    )
+
+    findings = validate_readme_parity(root)
+
+    finding = next(item for item in findings if item.code == "integration-installation")
+    assert finding.path == "README.md"
+    assert "sdr integrations install --destination" in finding.message
+
+
 def test_validator_requires_prominent_reciprocal_language_links(tmp_path: Path) -> None:
     root = _copy_readmes(tmp_path)
     english = root / "README.md"
