@@ -20,7 +20,7 @@ Repository, distribution, command, license, governance, documentation, security,
 - **WHEN** public metadata is validated
 - **THEN** the distribution is `spec-driven-research`
 - **THEN** the import package and command are `sdr`
-- **THEN** the license is Apache-2.0
+- **THEN** the license is MIT
 - **THEN** all public identities and coordinates are consistent
 
 #### Scenario: A public coordinate is invalid

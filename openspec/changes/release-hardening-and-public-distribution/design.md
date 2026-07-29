@@ -70,7 +70,7 @@ The supported adapter set is exactly Claude Code, Codex, and OpenCode. Hermes Ag
 
 ### Make governance and documentation release gates
 
-Publication requires real public project coordinates, a monitored private vulnerability-reporting route, release and immutable-version policy, supported-version policy, contribution guidance, and Apache-2.0 licensing. Tree, history, artifact, and secret audits remain fail closed and redact values.
+Publication requires real public project coordinates, a monitored private vulnerability-reporting route, release and immutable-version policy, supported-version policy, contribution guidance, and MIT licensing. Tree, history, artifact, and secret audits remain fail closed and redact values.
 
 English and Spanish entry points must agree semantically on installation, support, release verification, security reporting, source provenance, root terminology, integration acquisition, statuses, and limitations. Parity stays concept-based rather than line-by-line.
 

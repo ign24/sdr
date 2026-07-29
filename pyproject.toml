@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Deterministic lifecycle and evidence gates for Spec-Driven Research"
 readme = "README.md"
 requires-python = ">=3.12"
-license = "Apache-2.0"
+license = "MIT"
 authors = [
     { name = "Ignacio Zúñiga Navarro" },
 ]
@@ -20,7 +20,7 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",

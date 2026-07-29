@@ -239,4 +239,4 @@ seguir [AGENTS.md](AGENTS.md). Los checks de mantenimiento están en
 
 ## Licencia
 
-Licenciado bajo Apache License 2.0. Consulta [LICENSE](LICENSE).
+Licenciado bajo la Licencia MIT. Consulta [LICENSE](LICENSE).

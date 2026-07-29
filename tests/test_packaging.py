@@ -28,7 +28,7 @@ def test_package_metadata_uses_sdr_version_as_single_source(tmp_path):
     assert config["project"]["dynamic"] == ["version"]
     assert config["tool"]["hatch"]["version"]["path"] == "src/sdr/__init__.py"
     assert config["project"]["readme"] == "README.md"
-    assert config["project"]["license"] == "Apache-2.0"
+    assert config["project"]["license"] == "MIT"
     assert config["project"]["authors"] == [{"name": "Ignacio Zúñiga Navarro"}]
     assert "urls" not in config["project"]
 
@@ -46,7 +46,7 @@ def test_package_metadata_uses_sdr_version_as_single_source(tmp_path):
         metadata = archive.read(metadata_name).decode("utf-8")
 
     assert f"Version: {sdr.__version__}\n" in metadata
-    assert "License-Expression: Apache-2.0\n" in metadata
+    assert "License-Expression: MIT\n" in metadata
 
 
 def test_sdist_contains_public_package_files_and_excludes_active_changes(tmp_path):

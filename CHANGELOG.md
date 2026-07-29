@@ -23,6 +23,7 @@ single source of truth is `src/sdr/__init__.py`.
 
 ### Changed
 
+- Current and future distributions are licensed under MIT; historical Apache-2.0 grants are not revoked.
 - Narrowed the documented Agent Skills adapter set to Claude Code, Codex, and
   OpenCode; removed Hermes Agent and OpenClaw adapters and support claims.
 

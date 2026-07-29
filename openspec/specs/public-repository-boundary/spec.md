@@ -41,7 +41,7 @@ across packaging and governance files.
 - **WHEN** package and repository metadata are validated
 - **THEN** the distribution is `spec-driven-research`
 - **THEN** the import package and console command are `sdr`
-- **THEN** the declared license is Apache-2.0
+- **THEN** the declared license is MIT
 
 ### Requirement: Synthetic public examples
 Published examples MUST use invented identities and results, reserved-domain URLs, relative paths,
