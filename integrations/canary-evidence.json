@@ -4,7 +4,7 @@
   "artifact": {
     "package_version": "0.1.0",
     "wheel_filename": "spec_driven_research-0.1.0-py3-none-any.whl",
-    "sha256": "508104bf31b787713c0e6bda241a446e945dc114752aacf14173f4aeedaec7c1"
+    "sha256": "95312a80af936df7e4c8ae1da641d1adee24801c772aec9ea64acb79e571b9fd"
   },
   "environment": {
     "isolation": "env-i",

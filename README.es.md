@@ -12,16 +12,39 @@
 
 [English](README.md)
 
-**Transforma una pregunta abierta en una decisión revisable y un activo reutilizable.**
+## La IA puede escribir el informe. ¿Podés confiar en la investigación?
 
-SDR es una CLI local para investigación aplicada que necesita una cadena de
-evidencia visible:
+**Spec-Driven Research es un workflow de evidencia para investigaciones extensas
+asistidas por IA.**
+
+Mantiene fuentes, afirmaciones, pruebas reproducibles y decisiones humanas
+trazables entre sesiones, convirtiendo una respuesta convincente en una decisión
+revisable y un activo reutilizable:
 
 `pregunta -> evidencia -> probe opcional -> decisión con aprobación humana -> activo reutilizable`
 
-Cada investigación tiene un ciclo protegido, checks determinísticos, aprobación
-humana explícita y JSON estable para automatización. El resultado no es solo una
-carpeta de notas, sino una decisión cuya evidencia y limitaciones pueden revisarse.
+## Por qué existe SDR
+
+Los agentes de investigación son rápidos, pero sus resultados son difíciles de
+auditar. Las fuentes pueden desaparecer o no estar disponibles. Una cita puede no
+respaldar la afirmación asociada. Los resultados pueden declararse sin una prueba
+reproducible. Durante investigaciones extensas, el contexto y las razones se
+pierden gradualmente entre sesiones.
+
+SDR da a la investigación una estructura duradera. Preserva la cadena de
+evidencia, detecta validaciones obsoletas, separa las afirmaciones respaldadas por
+fuentes de las pruebas ejecutables y exige aprobación humana explícita antes de
+que una recomendación se convierta en una decisión.
+
+| Investigación habitual con agentes | Spec-Driven Research |
+| --- | --- |
+| Respuesta final convincente | Cadena de evidencia revisable |
+| URLs en una respuesta | Fuentes, metadatos y snapshots |
+| Afirmaciones mezcladas con inferencias | Afirmaciones ancladas explícitamente |
+| Contexto perdido entre sesiones | Investigación persistente por etapas |
+| Resultados declarados en prosa | Probes reproducibles |
+| Recomendación generada por un agente | Decisión con aprobación humana |
+| Otro informe aislado | Activo de investigación reutilizable |
 
 > **Software alfa, disponible solo desde el código fuente.** No hay release en GitHub
 > ni en PyPI. Instálalo desde el código fuente canónico en GitHub. Las

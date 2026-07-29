@@ -12,15 +12,38 @@
 
 [Español](README.es.md)
 
-**Turn an open research question into a reviewable decision and a reusable asset.**
+## AI can write the report. Can you trust the research?
 
-SDR is a local CLI for applied research that needs a visible evidence trail:
+**Spec-Driven Research is an evidence workflow for long-running, AI-assisted
+investigations.**
+
+It keeps sources, claims, reproducible checks, and human decisions traceable
+across sessions, so a convincing answer can become a reviewable decision and a
+reusable asset:
 
 `question -> evidence -> optional probe -> human-approved decision -> reusable asset`
 
-It gives each investigation a guarded lifecycle, deterministic checks, explicit
-human approval, and stable JSON for automation. The result is not just a folder
-of notes: it is a decision record whose evidence and limitations can be reviewed.
+## Why SDR exists
+
+Research agents are fast, but their output is difficult to audit. Sources may
+disappear or be inaccessible. A citation may not support the claim attached to
+it. Results can be asserted without a reproducible check. During long
+investigations, context and rationale are gradually lost across sessions.
+
+SDR gives the investigation a durable structure. It preserves the evidence
+trail, detects stale validation, separates sourced claims from executable
+checks, and requires explicit human approval before a recommendation becomes a
+decision.
+
+| Typical agent research | Spec-Driven Research |
+| --- | --- |
+| Convincing final answer | Reviewable evidence trail |
+| URLs in a response | Sources, metadata, and snapshots |
+| Claims mixed with inference | Explicitly anchored claims |
+| Context lost between sessions | Persistent staged investigation |
+| Results asserted in prose | Reproducible probes |
+| Agent-generated recommendation | Human-approved decision |
+| Another isolated report | Reusable research asset |
 
 > **Alpha, source-only software.** SDR has no GitHub release and no PyPI release.
 > Install it from the canonical GitHub source. Interfaces and artifact contracts
