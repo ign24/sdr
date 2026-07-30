@@ -77,6 +77,39 @@ Sigue la [guía inicial](docs/getting-started.es.md) para ejecutar el mismo fixt
 con la CLI pública, incluido `sdr approve` explícito y `--no-commit` en cada
 transición que podría crear un commit.
 
+## Instálalo con tu agente
+
+Si utilizas Claude Code, Codex u OpenCode, pega este mensaje en el agente que
+está operando en el proyecto donde quieres usar SDR:
+
+```text
+Instala Spec-Driven Research desde https://github.com/ign24/sdr para usarlo en
+este proyecto.
+
+Antes de modificar nada, detecta mi sistema operativo y comprueba que estén
+disponibles Git, uv y Python 3.12 o posterior. Explícame brevemente qué vas a
+instalar y dónde, y solicita mi aprobación una sola vez.
+
+Después de mi aprobación:
+1. Instala SDR como herramienta aislada con uv desde la fuente canónica de
+   GitHub. No uses sudo ni dejes un clon de SDR dentro de mi proyecto.
+2. Determina si estás operando como Claude Code, Codex u OpenCode e instala las
+   siete skills empaquetadas de SDR únicamente en el directorio de skills
+   correspondiente de este proyecto.
+3. No sobrescribas archivos existentes. Si falta un requisito, permiso o acceso
+   de red, detente y explícame qué debo resolver.
+4. Verifica el resultado con `sdr --help` y `sdr doctor --json`, confirma que se
+   instalaron las siete skills de SDR e indícame si es necesario reiniciar el
+   agente para descubrirlas.
+
+No inicies una investigación, no modifiques archivos ajenos a la instalación y
+no crees commits de Git.
+```
+
+El agente realiza los pasos específicos del entorno, mientras que la CLI de SDR
+y su instalador de skills, seguro ante conflictos, aportan comprobaciones
+determinísticas. También puedes utilizar los comandos manuales siguientes.
+
 ## Instalación desde el código fuente
 
 SDR requiere Python 3.12 o posterior. Instala el código fuente canónico actual:
