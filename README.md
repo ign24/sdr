@@ -45,6 +45,18 @@ decision.
 | Agent-generated recommendation | Human-approved decision |
 | Another isolated report | Reusable research asset |
 
+## Install with your agent
+
+Paste this into Claude Code, Codex, or OpenCode:
+
+```text
+Install Spec-Driven Research from https://github.com/ign24/spec-driven-research
+in this project. Read its installation and agent-integration documentation
+first. Explain what you will change and ask for my approval, then install SDR
+and the project-local skills for this agent and run the documented checks. Do
+not overwrite existing files or create commits.
+```
+
 > **Alpha, source-only software.** SDR has no GitHub release and no PyPI release.
 > Install it from the canonical GitHub source. Interfaces and artifact contracts
 > can still change before the first public release.
@@ -75,39 +87,6 @@ Reviewer`. Inspect the materialized evidence at:
 Follow the [beginner guide](docs/getting-started.md) to run the same fixture with
 the public CLI, including explicit `sdr approve` and `--no-commit` on every
 commit-producing transition.
-
-## Install with your agent
-
-If you use Claude Code, Codex, or OpenCode, paste this prompt into the agent
-running in the project where you want to use SDR:
-
-```text
-Install Spec-Driven Research from https://github.com/ign24/sdr for use in
-this project.
-
-Before changing anything, detect my operating system and check for Git, uv,
-and Python 3.12 or newer. Briefly explain what you will install and where,
-then ask for my approval once.
-
-After approval:
-1. Install SDR as an isolated tool with uv from the canonical GitHub source.
-   Do not use sudo and do not leave a clone of SDR inside my project.
-2. Determine whether you are running as Claude Code, Codex, or OpenCode, and
-   install the seven packaged SDR skills only in this project's corresponding
-   skills directory.
-3. Do not overwrite existing files. If a requirement, permission, or network
-   access is missing, stop and explain what I need to resolve.
-4. Verify the result with `sdr --help` and `sdr doctor --json`, confirm that all
-   seven SDR skills were installed, and tell me if the agent must be restarted
-   to discover them.
-
-Do not start a research investigation, modify unrelated files, or create Git
-commits.
-```
-
-The agent performs the environment-specific steps, while the SDR CLI and its
-conflict-safe skills installer provide deterministic checks. You can also use
-the manual commands below.
 
 ## Install from source
 
